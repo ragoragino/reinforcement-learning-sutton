@@ -168,23 +168,23 @@ void bandit(double* average_reward, double* optimal_action, const double &epsilo
     const double nd_sd = 5;
     
     // This loop produces standard k-bandit algorithm without random-walk dynamics of the action values
-    // Also the loop on lines 121-125 needs to be commented in order for this version to work properly
+    // Also the loop after addition of current_step needs to be commented in order for this version to work properly
     // Saved as bandit_classic.csv
-    for (int j = 0; j != k; j++)
+    /*for (int j = 0; j != k; j++)
     {
     std::normal_distribution<double> nd(nd_mean,nd_sd);
     action_values[j] = nd(rd);
-    }
+    }*/
     
 
     for (int i = 0; i != steps; i++)
     {
         current_step++;
-        /*for (int j = 0; j != k; j++)
+        for (int j = 0; j != k; j++)
         {
             std::normal_distribution<double> nd(increment_mean, increment_sd);
             action_values[j] += nd(rd);
-        }*/
+        }
         std::vector<int> current_max_index = max_index(action_values);
         if (ud1(rd) == 0)
         {
