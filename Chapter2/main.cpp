@@ -111,8 +111,8 @@ int main() {
         }
     }
     file1.close();
-    delete opt_action;
-    delete average_reward;
+    delete[] opt_action;
+    delete[] average_reward;
 
     routine_no = 1.0;
     average_reward = new double[steps];
