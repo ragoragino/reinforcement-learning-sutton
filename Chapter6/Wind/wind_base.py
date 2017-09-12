@@ -68,7 +68,6 @@ if __name__ == '__main__':
             track_x.append(i)
             track_y.append(j)
 
-    # Finding the max deterministic policy from the starting point
     for method in state_action.keys():
         new_state = start
         traj_x = []

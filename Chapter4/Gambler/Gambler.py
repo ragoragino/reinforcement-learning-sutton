@@ -2,7 +2,8 @@ import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+cur_dir = os.path.dirname(__file__)
 os.chdir(cur_dir)
 size = 99  # size of the state set (excluding 0 a 100 states)
 

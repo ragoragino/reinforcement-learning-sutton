@@ -9,19 +9,6 @@
 
 
 /*
-EXERCISE 2.5, pp. 36:
-Design and conduct an experiment to demonstrate the difficulties that sample-average 
-methods have for nonstationary problems. Use a modified version of the 10-armed testbed
-in which all the q∗(a) start out equal and then take independent random walks (say by 
-adding a normally distributed increment with mean zero and standard deviation 0.01 to 
-all the q∗(a) on each step). Prepare plots like Figure 2.2 for an action-value method 
-using sample averages, incrementally computed, and another action-value method using 
-a constant step-size parameter, alpha = 0.1. Use epsilon = 0.1 and longer runs, say of 
-10,000 steps.
-*/
-
-
-/*
 Template function that returns maximum value from an array
 
 @param
@@ -75,7 +62,88 @@ Function that compares strings (i.e. stringVec) of two stringContainer structure
 @return
     updated arrays average_reward and optimal_action
 */
-void bandit(double* average_reward, double* optimal_action, const double &, const double &, const int &, const double &);
+
+void bandit(double* average_reward, double* optimal_action, const double &epsilon,
+	const double &routine_no, const int &steps, const double &alpha) {
+	const int k = 10; // 10 bandits
+	const int inv_epsilon = 1 / epsilon; // probability associated with the exploration parameter
+	const double increment_sd = 0.01; // random-walk increment of action values
+	const double increment_mean = 0; // random-walk mean of action values
+	const int reward_sd = 1; // standard deviation of reward distribution
+	std::vector<double> l_average_reward = { 0 }; // vector holding local values of the average reward
+	std::vector<bool> l_optimal_action; // vector holding local values of the optimal action
+	double action_estimates[k]; // estimates of the action values
+	double action_values[k]; // true action values
+	double counter[k]; // counter of the number of selections of individual bandits
+	for (int i = 0; i != k; i++)
+		counter[i]++;
+	std::random_device rd;
+	const std::uniform_int_distribution<int> ud1(0, inv_epsilon - 1);
+	const std::uniform_int_distribution<int> ud2(0, k - 1);
+	const double nd_mean = 0;
+	const double nd_sd = 5;
+
+	// This loop produces standard k-bandit algorithm without random-walk dynamics of the action values
+	// Also the loop after addition of current_step needs to be commented in order for this version to work properly
+	/* 
+	for (int j = 0; j != k; j++)
+	{
+	std::normal_distribution<double> nd(nd_mean,nd_sd);
+	action_values[j] = nd(rd);
+	} 
+	*/
+
+
+	for (int i = 0; i != steps; i++)
+	{
+		for (int j = 0; j != k; j++)
+		{
+			std::normal_distribution<double> nd(increment_mean, increment_sd);
+			action_values[j] += nd(rd);
+		}
+		std::vector<int> current_max_index = max_index(action_values);
+		if (ud1(rd) == 0)
+		{
+			int pick = ud2(rd);
+			bool optimal = std::find(current_max_index.begin(), current_max_index.end(), pick) != current_max_index.end();
+			l_optimal_action.push_back(optimal);
+			std::normal_distribution<double> nd(action_values[pick], reward_sd);
+			double reward = nd(rd);
+			l_average_reward.push_back(reward);
+			action_estimates[pick] += 1.0 / (counter[pick]) * (reward - action_estimates[pick]) *
+				(alpha != 1.0 ? counter[pick] * alpha : alpha);
+			counter[pick]++;
+		}
+		else
+		{
+			std::vector<int> max_index_vec = max_index(action_estimates);
+			std::uniform_int_distribution<int> ud3(0, max_index_vec.size() - 1);
+			int pick = max_index_vec[ud3(rd)];
+			bool optimal = std::find(current_max_index.begin(), current_max_index.end(), pick) != current_max_index.end();
+			l_optimal_action.push_back(optimal);
+			std::normal_distribution<double> nd(action_values[pick], reward_sd);
+			double reward = nd(rd);
+			l_average_reward.push_back(reward);
+			action_estimates[pick] += (1.0 / (counter[pick]))  * (reward - action_estimates[pick]) *
+				(alpha != 1.0 ? counter[pick] * alpha : alpha);
+			counter[pick]++;
+		}
+	}
+
+	for (int i = 0; i != steps; i++)
+	{
+		if (routine_no < 2)
+		{
+			average_reward[i] = l_average_reward[i];
+			optimal_action[i] = l_optimal_action[i];
+		}
+		else
+		{
+			average_reward[i] = l_average_reward[i] * (1.0 / routine_no) + (routine_no - 1.0) / (routine_no)* average_reward[i];
+			optimal_action[i] = l_optimal_action[i] * (1.0 / routine_no) + (routine_no - 1.0) / (routine_no)* optimal_action[i];
+		}
+	}
+}
 
 
 int main() {
@@ -139,92 +207,10 @@ int main() {
         }
     }
     file2.close();
-    delete opt_action;
-    delete average_reward;
+    delete[] opt_action;
+    delete[] average_reward;
 
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " milliseconds" << std::endl;
     return 0;
-}
-
-void bandit(double* average_reward, double* optimal_action, const double &epsilon, const double &routine_no, const int &steps, const double &alpha) {
-    const int k = 10; // 10 bandits
-    const int inv_epsilon = 1 / epsilon; // probability associated with the exploration paramter
-    const double increment_sd = 0.01; // random-walk increment of action values
-    const double increment_mean = 0; // random-walk mean of action values
-    const int reward_sd = 1; // standard deviation of reward distribution
-    std::vector<double> l_average_reward = { 0 }; // variable holding local values of the average reward
-    double current_step = 0;
-    std::vector<bool> l_optimal_action; // variable holding local values of the optimal action
-    double action_estimates[k] = {}; // estimates of the action values
-    double action_values[k] = {}; // true action values
-    double counter[k] = {}; // counter of the number of selections of individual bandits
-    for (int i = 0; i != k; i++)
-        counter[i]++;
-    std::random_device rd;
-    const std::uniform_int_distribution<int> ud1(0, inv_epsilon - 1);
-    const std::uniform_int_distribution<int> ud2(0, k - 1);
-    const double nd_mean = 0;
-    const double nd_sd = 5;
-    
-    // This loop produces standard k-bandit algorithm without random-walk dynamics of the action values
-    // Also the loop after addition of current_step needs to be commented in order for this version to work properly
-    // Saved as bandit_classic.csv
-    /*for (int j = 0; j != k; j++)
-    {
-    std::normal_distribution<double> nd(nd_mean,nd_sd);
-    action_values[j] = nd(rd);
-    }*/
-    
-
-    for (int i = 0; i != steps; i++)
-    {
-        current_step++;
-        for (int j = 0; j != k; j++)
-        {
-            std::normal_distribution<double> nd(increment_mean, increment_sd);
-            action_values[j] += nd(rd);
-        }
-        std::vector<int> current_max_index = max_index(action_values);
-        if (ud1(rd) == 0)
-        {
-            int pick = ud2(rd);
-            bool optimal = std::find(current_max_index.begin(), current_max_index.end(), pick) != current_max_index.end();
-            l_optimal_action.push_back(optimal);
-            std::normal_distribution<double> nd(action_values[pick], reward_sd);
-            double reward = nd(rd);
-            l_average_reward.push_back(reward);
-            action_estimates[pick] += 1.0 / (counter[pick]) * (reward - action_estimates[pick]) *
-                (alpha != 1.0 ? counter[pick] * alpha : alpha);
-            counter[pick]++;
-        }
-        else
-        {
-            std::vector<int> max_index_vec = max_index(action_estimates);
-            std::uniform_int_distribution<int> ud3(0, max_index_vec.size() - 1);
-            int pick = max_index_vec[ud3(rd)];
-            bool optimal = std::find(current_max_index.begin(), current_max_index.end(), pick) != current_max_index.end();
-            l_optimal_action.push_back(optimal);
-            std::normal_distribution<double> nd(action_values[pick], reward_sd);
-            double reward = nd(rd);
-            l_average_reward.push_back(reward);
-            action_estimates[pick] += (1.0 / (counter[pick]))  * (reward - action_estimates[pick]) *
-                (alpha != 1.0 ? counter[pick] * alpha : alpha);
-            counter[pick]++;
-        }
-    }
-
-    for (int i = 0; i != steps; i++)
-    {
-        if (routine_no < 2)
-        {
-            average_reward[i] = l_average_reward[i];
-            optimal_action[i] = l_optimal_action[i];
-        }
-        else
-        {
-            average_reward[i] = l_average_reward[i] * (1.0 / routine_no) + (routine_no - 1.0) / (routine_no) * average_reward[i];
-            optimal_action[i] = l_optimal_action[i] * (1.0 / routine_no) + (routine_no - 1.0) / (routine_no) * optimal_action[i];
-        }
-    }
 }

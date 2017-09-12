@@ -114,6 +114,11 @@ def q_learn(height, width, start, end, max_iter, epsilon, alpha, reward, actions
     return episode_length, state_actions
 
 
+"""
+Epsilon-soft Double Q-learning optimal control algorithm
+"""
+
+
 def double_q_learn(height, width, start, end, max_iter, epsilon, alpha, reward, actions):
     l_actions = len(actions)
     episode_length = np.zeros(max_iter, dtype=int)
