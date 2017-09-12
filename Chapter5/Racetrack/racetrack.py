@@ -221,6 +221,5 @@ while i < -max_steps:
 plt.figure(figsize=(16, 12), dpi=100)
 plt.scatter(track_x, track_y, color="blue", label="Track")
 plt.scatter(traj_30_x, traj_30_y, color="red")
-plt.show()
 plt.savefig("RACETRACK.pdf", dpi=100, format='pdf')
 
