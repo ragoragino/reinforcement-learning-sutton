@@ -85,9 +85,13 @@ if __name__ == '__main__':
             if state == end:
                 break
 
-            # Finding the deterministic max action from the state
-            fut_action_i = np.argmax(state_action[method][state[0], state[1], :])
-            new_action = actions[fut_action_i]
+            # Avoiding cases where the new state might be outside of the environment borders
+            try:
+                # Finding the deterministic max action from the state
+                fut_action_i = np.argmax(state_action[method][state[0], state[1], :])
+                new_action = actions[fut_action_i]
+            except IndexError:
+                break
 
             new_state = (state[0] + new_action[0], state[1] + new_action[1])
 

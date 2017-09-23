@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-cur_dir = os.path.dirname(__file__)
-os.chdir(cur_dir)
+#cur_dir = os.path.dirname(__file__)
+#os.chdir(cur_dir)
 np.random.seed(123)
 
 height = 32  # height of the track
@@ -27,7 +27,7 @@ track_x = []
 track_y = []
 max_iter = 500000  # Number of iterations
 epsilon = 0.4  # Exploration parameter
-max_steps = -9  # How many steps to end an episode
+max_steps = -30  # How many steps to end an episode
 
 # Creating the viable positions on the xy axis
 # defined by the grid width x height
@@ -124,7 +124,7 @@ for it in range(max_iter):
     step = 0
     start = (np.random.choice(starting_positions, 1)[0], 0)
     velocity = (0, 0)
-    indicator = False
+    # indicator = False
     while step > max_steps:
         step -= 1
         action = (states[start[0], start[1], 2],
@@ -175,11 +175,11 @@ for it in range(max_iter):
             as when finishing he also gets -9. I have decided to implement an
             incentive in order to make him learn that ending in a finish is more optimal
             than other ends.
-            """
+
             if indicator:
                 states_actions[trajectory[i][0], trajectory[i][1],
                                mov_1, mov_2, 1] += 0.05
-
+            """
     for i in trajectory:
         run_max = max_steps - 1
         if i[1] == 0:
@@ -193,7 +193,7 @@ for it in range(max_iter):
                 states[i[0], i[1], 2] = index[0]
                 states[i[0], i[1], 3] = index[1]
 
-new_state = (5, 0)
+new_state = (8, 0)
 traj_30_x = [new_state[0]]
 traj_30_y = [new_state[1]]
 velocity = (0, 0)
@@ -221,5 +221,6 @@ while i < -max_steps:
 plt.figure(figsize=(16, 12), dpi=100)
 plt.scatter(track_x, track_y, color="blue", label="Track")
 plt.scatter(traj_30_x, traj_30_y, color="red")
-plt.savefig("RACETRACK.pdf", dpi=100, format='pdf')
+plt.show()
+#plt.savefig("RACETRACK.pdf", dpi=100, format='pdf')
 
