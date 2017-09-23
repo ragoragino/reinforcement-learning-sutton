@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     x = np.arange(1, n_points + 1)
     plt.figure(figsize=(16, 12))
-    plt.title("Time to find the end of the episode for first {} iterations, by {} points.".format(max_iter, grid))
+    plt.title("Time to find the end of the episode for {} iterations, by {} points.".format(max_iter, grid))
     cmap = plt.get_cmap('Paired')
     for i, method in enumerate(episode_length.keys()):
         plt.plot(x, episode_mean[method], color=cmap(i),
