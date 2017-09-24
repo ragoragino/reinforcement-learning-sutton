@@ -16,10 +16,11 @@ def dynaq_b(height, width, start, end, max_iter, epsilon, alpha,
              gamma, reward, actions, n, kappa, wall_change):
     l_actions = len(actions)
     episode_length = np.zeros(max_iter, dtype=int)
-    state_actions = np.zeros((width, height, l_actions), dtype=float)  # keeps Q(s,a) for all possible moves
+    # state_actions keep Q(s,a) for all possible moves
+    state_actions = np.zeros((width, height, l_actions), dtype=float)
     model = {}  # model (S, A) values
-    visits = np.zeros((width, height, l_actions), dtype=float)  # keeps track for how long
-                                                                # the state/action was not visited
+    # visits keeps track for how long the state/action was not visited
+    visits = np.zeros((width, height, l_actions), dtype=float)
 
     for i in range(max_iter):
         state = start
@@ -33,6 +34,7 @@ def dynaq_b(height, width, start, end, max_iter, epsilon, alpha,
                 action_i = np.random.choice(np.arange(0, l_actions))
                 action = actions[action_i]
             else:
+                # Action selection is adjusted
                 action_i = np.argmax(state_actions[state[0], state[1], :])
                 action = actions[action_i]
 
@@ -60,33 +62,40 @@ def dynaq_b(height, width, start, end, max_iter, epsilon, alpha,
                                                                        action_i])
             state_actions[state[0], state[1], action_i] += td
 
-            model[(state, action_i)] = new_state  # updating model -
-                                                  # assuming deterministic environment
+            model[(state, action_i)] = new_state  # update of the model
 
-            # Keeping the track of how long ago state/action pairs were tested
+            # Keeping track of how long ago state/action pairs were tested
             visits += 1
-            visits[state[0], state[1], action_i] -= 1
+            visits[state[0], state[1], action_i] = 0
 
             # Update
             state = new_state
 
             # Model planning
             for _ in range(n):
-                pick = np.random.randint(0, len(model))
-                model_state, model_action_i = list(model.keys())[pick]
-                model_new_state = model[(model_state, model_action_i)]
+                pick_0 = np.random.randint(0, width)
+                pick_1 = np.random.randint(0, height)
+                pick_a = np.random.randint(0, 4)
+                model_state = (pick_0, pick_1)
+                model_action_i = pick_a
+                try:
+                    model_new_state = model[(model_state, model_action_i)]
+                    reward += kappa * np.sqrt(visits[model_state[0],
+                                                     model_state[1],
+                                                     model_action_i])
+                except KeyError:
+                    model_new_state = model_state
+                    reward = 0
                 model_new_state_max = np.max(state_actions[model_new_state[0],
                                              model_new_state[1], :])
-                special_reward = reward + kappa * np.sqrt(visits[model_state[0],
-                                                                 model_state[1],
-                                                                 model_action_i])
-                td = alpha * (special_reward + gamma * model_new_state_max
-                              - state_actions[model_state[0], model_state[1],
-                                              model_action_i])
+                td = alpha * (reward + gamma * model_new_state_max -
+                              state_actions[model_state[0], model_state[1],
+                                            model_action_i])
                 state_actions[model_state[0], model_state[1], model_action_i] += td
+                reward = -1
 
         episode_length[i] = - steps
-        print("EP: {} - STEPS DQB: {}".format(i, steps))
+
     return episode_length, state_actions
 
 
@@ -99,9 +108,11 @@ def dynaq_as(height, width, start, end, max_iter, epsilon, alpha,
               gamma, reward, actions, n, kappa, wall_change):
     l_actions = len(actions)
     episode_length = np.zeros(max_iter, dtype=int)
-    state_actions = np.zeros((width, height, l_actions), dtype=float)  # keeps Q(s,a) for all possible moves
+    # state_actions keep Q(s,a) for all possible moves
+    state_actions = np.zeros((width, height, l_actions), dtype=float)
     model = {}  # model (S, A) values
-    visits = np.zeros((width, height, l_actions), dtype=float)  # keeps for how long the state/action
+    # visits keep for how long the state/action
+    visits = np.zeros((width, height, l_actions), dtype=float)
 
     for i in range(max_iter):
         state = start
@@ -116,7 +127,7 @@ def dynaq_as(height, width, start, end, max_iter, epsilon, alpha,
                 action = actions[action_i]
             else:
                 # Action selection is adjusted
-                action_i = np.argmax(state_actions[state[0], state[1], :] + kappa * np.sqrt(visits[state[0], state[1], :]))
+                action_i = np.argmax(state_actions[state[0], state[1], :])
                 action = actions[action_i]
 
             if i < wall_change:
@@ -143,28 +154,40 @@ def dynaq_as(height, width, start, end, max_iter, epsilon, alpha,
                                                                        action_i])
             state_actions[state[0], state[1], action_i] += td
 
-            model[(state, action_i)] = new_state  # assuming deterministic environment
+            model[(state, action_i)] = new_state  # model update
 
-            # Keeping the track of how long ago state/action pairs were tested
+            # Keeping track of how long ago state/action pairs were tested
             visits += 1
-            visits[state[0], state[1], action_i] -= 1
+            visits[state[0], state[1], action_i] = 0
 
             # Update
             state = new_state
 
             # Model planning
             for _ in range(n):
-                pick = np.random.randint(0, len(model))
-                model_state, model_action_i = list(model.keys())[pick]
-                model_new_state = model[(model_state, model_action_i)]
+                pick_0 = np.random.randint(0, width)
+                pick_1 = np.random.randint(0, height)
+                model_state = (pick_0, pick_1)
+                model_action_i = np.argmax(state_actions[model_state[0], model_state[1], :] +
+                                           kappa * np.sqrt(visits[model_state[0],
+                                                           model_state[1], :]))
+                #print("SA: {}".format(state_actions[model_state[0], model_state[1], :]))
+                #print("addon: {}".format(kappa * np.sqrt(visits[model_state[0],
+                #                                      model_state[1], :])))
+                try:
+                    model_new_state = model[(model_state, model_action_i)]
+                except KeyError:
+                    model_new_state = model_state
+                    reward = 0
                 model_new_state_max = np.max(state_actions[model_new_state[0],
                                              model_new_state[1], :])
                 td = alpha * (reward + gamma * model_new_state_max -
                               state_actions[model_state[0], model_state[1],
                                             model_action_i])
                 state_actions[model_state[0], model_state[1], model_action_i] += td
+                reward = -1
 
         episode_length[i] = - steps
-        print("EP: {} - STEPS DQB2: {}".format(i, steps))
+        print("DBQ2: {}, STEPS {}".format(i, - steps))
 
     return episode_length, state_actions

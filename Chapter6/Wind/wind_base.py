@@ -47,7 +47,7 @@ if __name__ == '__main__':
     episode_mean = {i: np.zeros(n_points, dtype=float) for i in methods}
     for i in range(n_points):
         for met in methods:
-            episode_mean[met][i] = episode_length[met][n_points * i:n_points * i + grid].mean()
+            episode_mean[met][i] = episode_length[met][grid * i:grid * i + grid].mean()
 
     x = np.arange(1, n_points + 1)
     plt.figure(figsize=(16, 12))
