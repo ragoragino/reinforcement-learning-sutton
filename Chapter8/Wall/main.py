@@ -23,11 +23,11 @@ if __name__ == '__main__':
     reward = -1
     actions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
     n = 10
+    wall_change = 3000
     kappa_b = [0.05, 0.01, 0.001]
     kappa_as = [0.1, 0.05, 0.01]
     methods = ['DYNA-Q+ B ' + str(i) for i in kappa_b] + \
               ['DYNA-Q+ AS ' + str(i) for i in kappa_as]
-    wall_change = 3000
 
     episode_length = {i: [] for i in methods}
     state_action = {i: [] for i in methods}
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     x = np.arange(1, n_points + 1)
     plt.figure(figsize=(16, 12))
-    plt.title("Time to find the end of the episode for  {} iterations, by {} "
+    plt.title("Time to find the end of the episode for {} iterations, by {} "
               "points.".format(max_iter, grid))
     cmap = plt.get_cmap('Paired')
     for i, method in enumerate(episode_length.keys()):
@@ -67,7 +67,7 @@ if __name__ == '__main__':
                  label="{} - Mean: {}".format(method, episode_mean_all),
                  linewidth=1.0, linestyle="-")
         plt.legend()
-    plt.savefig("Episode_length_base.pdf", dpi=100, format='pdf')
+    plt.savefig("Episode_length.pdf", dpi=100, format='pdf')
 
     # The rectangle world
     track_x = []
@@ -106,8 +106,12 @@ if __name__ == '__main__':
             else:
                 new_state = (state[0] + new_action[0], state[1] + new_action[1])
 
+            if new_state[0] < 0 or new_state[0] > width - 1 or \
+                            new_state[1] < 0 or new_state[1] > height - 1:
+                break
+
         # Plot of the optimal path
-        wall = [1, 2, 3, 4, 5, 6, 7, 8]
+        wall = [1, 2, 3, 4, 5, 6, 7]
         plt.figure(figsize=(16, 12))
         plt.scatter(track_x, track_y, color="blue", label="Track")
         plt.scatter(wall, [2] * len(wall), color="magenta",
@@ -118,5 +122,5 @@ if __name__ == '__main__':
         plt.xticks(np.arange(0, width, 1))
         plt.text(3, 0.1, r'S', fontsize=10)
         plt.text(8, 6.1, r'E', fontsize=10)
-        plt.savefig("{}_optimal_policy_base.pdf".format(method), dpi=100,
+        plt.savefig("{}_optimal_policy.pdf".format(method), dpi=100,
                     format='pdf')
