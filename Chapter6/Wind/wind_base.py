@@ -99,6 +99,10 @@ if __name__ == '__main__':
             elif state[0] in (6, 7):
                 new_state = (new_state[0], min(new_state[1] + 2, height - 1))
 
+            if new_state[0] < 0 or new_state[0] > width - 1 or \
+                            new_state[1] < 0 or new_state[1] > height - 1:
+                break
+
         # Plot of the optimal path
         winds = [1, 1, 1, 2, 2, 1]
         plt.figure(figsize=(16, 12))
