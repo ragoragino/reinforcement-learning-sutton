@@ -7,7 +7,7 @@ environment in order to increase the learning efficiency. The authors present in
 Dyna-Q+ algorithm, which is intended to perform well in situations, where the environment might 
 change during the learning process. The algorithm keeps track of the time it last visited each 
 state/action pair ($\tau (s, a)$) and adds an additional reward, called the exploration bonus, 
-derived from this time (with parameter $\kappa$) to the basic reward during the planning back-up. 
+derived from this time (with parameter $\kappa$) to the basic reward during the planning backup. 
 This tweak should motivate the agent to not only keep exploring, but to keep 
 exploring places in a more systematic fashion, i.e. explore state/action pairs that have not been visited 
 for a long time. 
