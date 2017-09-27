@@ -14,9 +14,9 @@ for a long time.
 
 #### Exercise 8.4:
 The exploration bonus described above actually changes the estimated values of states and actions. 
-Is this necessary? Suppose the bonus $\kappa$ \* $\sqrt\_{\tau}$ was used not in backups, but solely in action 
+Is this necessary? Suppose the bonus $\kappa$ \* $\sqrt{\tau}$ was used not in backups, but solely in action 
 selection. That is, suppose the action selected was always that for which $Q(S\_t; a) + 
-\kappa \* \sqrt\_{\tau (S\_t; a)}$ was maximal. Carry out a gridworld experiment that tests and 
+\kappa \* \sqrt{\tau (S\_t; a)}$ was maximal. Carry out a gridworld experiment that tests and 
 illustrates the strengths and weaknesses of this alternate approach.
 
 ### Solution
